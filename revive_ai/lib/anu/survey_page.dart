@@ -6,26 +6,23 @@ class SurveyPage extends StatefulWidget {
 }
 
 class _SurveyPageState extends State<SurveyPage> {
-  // Store selected values for each category
-  List<String> selectedValues = List<String>.filled(11, ''); // Initially empty
-  bool formValid = true; // Tracks whether all fields are filled
+  List<String> selectedValues = List<String>.filled(11, '');
+  bool formValid = true;
 
-  // Define the categories and their options
   List<List<String>> categoriesOrder = [
-    ['Low', 'Moderate', 'High'],             // Stress Level
-    ['Negative', 'Neutral', 'Positive'],     // Mood Rating
-    ['Poor', 'Average', 'Good'],             // Sleep Quality
-    ['Low', 'Moderate', 'High'],             // Energy Level
-    ['Low', 'Normal', 'Extended', 'Overworking'],  // Work Hours Per Day
-    ['Dissatisfied', 'Neutral', 'Very Satisfied'], // Job Satisfaction
-    ['Low', 'Moderate', 'High'],             // Workload Intensity
-    ['Low Balance', 'Moderately Balanced', 'Balanced'],  // Break Frequency
-    ['None', 'Occasional', 'Frequent', 'Constant'],      // Overtime Frequency
-    ['Unclear', 'Somewhat Clear', 'Very Clear'],         // Role Clarity
-    ['Low', 'Moderate', 'High'],              // Autonomy in Work
+    ['Low', 'Moderate', 'High'],
+    ['Negative', 'Neutral', 'Positive'],
+    ['Poor', 'Average', 'Good'],
+    ['Low', 'Moderate', 'High'],
+    ['Low', 'Normal', 'Extended', 'Overworking'],
+    ['Dissatisfied', 'Neutral', 'Very Satisfied'],
+    ['Low', 'Moderate', 'High'],
+    ['Low Balance', 'Moderately Balanced', 'Balanced'],
+    ['None', 'Occasional', 'Frequent', 'Constant'],
+    ['Unclear', 'Somewhat Clear', 'Very Clear'],
+    ['Low', 'Moderate', 'High'],
   ];
 
-  // Define the labels for each category
   List<String> categoryLabels = [
     'Stress Level',
     'Mood Rating',
@@ -40,6 +37,8 @@ class _SurveyPageState extends State<SurveyPage> {
     'Autonomy in Work',
   ];
 
+  String? burnoutLevel; // Variable to store the burnout level
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,36 +48,35 @@ class _SurveyPageState extends State<SurveyPage> {
         elevation: 4,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade200, Colors.pink.shade200],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: categoriesOrder.length,
-          itemBuilder: (context, index) {
-            return _buildDropdownQuestion(index);
-          },
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: categoriesOrder.length,
+                itemBuilder: (context, index) {
+                  return _buildDropdownQuestion(index);
+                },
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurpleAccent,
         onPressed: () {
           if (_validateForm()) {
-            // If all fields are valid, submit the form
-            print("Survey Results: $selectedValues");
-            Navigator.pop(context, selectedValues); // Pass the selected values back
+            // Detect burnout and set the level
+            if (isBurnoutDetected(selectedValues)) {
+              burnoutLevel = determineBurnoutLevel(selectedValues);
+            } else {
+              burnoutLevel = 'No Burnout';
+            }
+            Navigator.pop(context, burnoutLevel);
           } else {
-            // Show an error message if not all fields are filled
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  'Please fill all fields!',
-                  style: TextStyle(fontFamily: 'Montserrat'),
-                ),
+                content: Text('Please fill all fields!', style: TextStyle(fontFamily: 'Montserrat')),
                 backgroundColor: Colors.redAccent,
               ),
             );
@@ -89,15 +87,11 @@ class _SurveyPageState extends State<SurveyPage> {
     );
   }
 
-  // Helper method to build a dropdown for each category
   Widget _buildDropdownQuestion(int index) {
-    Color cardColor = index.isEven ? Colors.white : Colors.yellow[50]!; // Alternate card colors
-
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
-      color: cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -115,20 +109,11 @@ class _SurveyPageState extends State<SurveyPage> {
             SizedBox(height: 10),
             DropdownButton<String>(
               value: selectedValues[index] != '' ? selectedValues[index] : null,
-              hint: Text(
-                'Select ${categoryLabels[index]}',
-                style: TextStyle(color: Colors.grey[700], fontFamily: 'Montserrat'),
-              ),
-              dropdownColor: Colors.white,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.deepPurpleAccent),
-              underline: Container(), // Remove default underline
+              hint: Text('Select ${categoryLabels[index]}', style: TextStyle(color: Colors.grey[700])),
               items: categoriesOrder[index]
                   .map((value) => DropdownMenuItem<String>(
                         value: value,
-                        child: Text(
-                          value,
-                          style: TextStyle(fontFamily: 'Montserrat', color: Colors.black87),
-                        ),
+                        child: Text(value, style: TextStyle(color: Colors.black87)),
                       ))
                   .toList(),
               onChanged: (newValue) {
@@ -137,36 +122,48 @@ class _SurveyPageState extends State<SurveyPage> {
                 });
               },
               isExpanded: true,
-              style: TextStyle(color: Colors.black87, fontSize: 16, fontFamily: 'Montserrat'),
             ),
-            if (!formValid && selectedValues[index] == '') // Show error if field is not selected
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'This field is required',
-                  style: TextStyle(color: Colors.redAccent, fontFamily: 'Montserrat'),
-                ),
-              ),
           ],
         ),
       ),
     );
   }
 
-  // Helper method to validate that all fields are selected
-  bool _validateForm() {
-    bool allFieldsFilled = true;
-    for (var value in selectedValues) {
-      if (value == '') {
-        allFieldsFilled = false;
-        break;
+  bool isBurnoutDetected(List<String> surveyAnswers) {
+    int burnoutIndicators = 0;
+    List<String> highBurnoutResponses = [
+      'High', 'Negative', 'Poor', 'Low', 'Overworking',
+      'Dissatisfied', 'High', 'Low Balance', 'Frequent', 'Unclear', 'Low'
+    ];
+
+    for (String answer in surveyAnswers) {
+      if (highBurnoutResponses.contains(answer)) {
+        burnoutIndicators++;
       }
     }
+    return burnoutIndicators >= 5; // Burnout if 5 or more indicators
+  }
 
-    setState(() {
-      formValid = allFieldsFilled; // Update the form validation state
-    });
+  String determineBurnoutLevel(List<String> surveyAnswers) {
+    int burnoutIndicators = 0;
+    List<String> seriousResponses = ['High', 'Overworking', 'Dissatisfied'];
+    
+    for (String answer in surveyAnswers) {
+      if (seriousResponses.contains(answer)) {
+        burnoutIndicators++;
+      }
+    }
+    
+    if (burnoutIndicators >= 4) {
+      return 'Very Serious Burnout';
+    } else if (burnoutIndicators >= 2) {
+      return 'Serious Burnout';
+    } else {
+      return 'Mild Burnout';
+    }
+  }
 
-    return allFieldsFilled;
+  bool _validateForm() {
+    return selectedValues.every((value) => value.isNotEmpty);
   }
 }
