@@ -23,8 +23,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            child: FractionallySizedBox(
+              widthFactor: 0.85, // Makes the card responsive, adjust as needed
               child: Card(
                 elevation: 10,
                 shape: RoundedRectangleBorder(
@@ -147,8 +147,36 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               child: Text(
                                 'Login',
-                                style: TextStyle(fontSize: 18,
-                                color: Colors.white),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Divider(thickness: 1, color: Colors.grey[300]),
+                            SizedBox(height: 10),
+                            // Google Sign-In Button
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                // TODO: Implement Google Sign-In
+                                print('Google Sign-In button pressed');
+                              },
+                              icon: Icon(Icons.login, color: Colors.white),
+                              label: Text(
+                                'Sign in with Google',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 15, horizontal: 30),
                               ),
                             ),
                           ],

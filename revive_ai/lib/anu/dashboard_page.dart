@@ -17,7 +17,7 @@ class _DashboardPageState extends State<DashboardPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
+            colors: [Colors.deepPurple.shade900, Colors.purpleAccent.shade200],
           ),
         ),
         child: Center(
@@ -27,7 +27,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Text(
                 'Welcome, [User Name]',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   fontFamily: 'Montserrat',
@@ -38,12 +38,13 @@ class _DashboardPageState extends State<DashboardPage> {
               SizedBox(height: 40),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  backgroundColor: Colors.purple[300],
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                  backgroundColor: Colors.purpleAccent.shade400,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  elevation: 5,
+                  elevation: 8,
+                  shadowColor: Colors.black38,
                 ),
                 onPressed: () async {
                   // Navigate to Survey page
@@ -54,7 +55,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   if (result != null && result is List<String>) {
                     setState(() {
-                      // Assuming the result is a list of strings representing the survey results
                       burnoutLevel = _calculateBurnoutLevel(result);
                     });
                   }
@@ -62,9 +62,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Text(
                   'Take Survey',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
+                    letterSpacing: 1.2,
                   ),
                 ),
               ),
@@ -90,19 +91,19 @@ class BurnoutGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(30),
       decoration: BoxDecoration(
         gradient: RadialGradient(
-          colors: [Colors.purpleAccent, Colors.deepPurple],
+          colors: [Colors.deepPurple.shade600, Colors.purpleAccent.shade100],
           center: Alignment.center,
           radius: 0.85,
         ),
-        borderRadius: BorderRadius.circular(120),
+        borderRadius: BorderRadius.circular(150),
         boxShadow: [
           BoxShadow(
-            color: Colors.black38,
-            blurRadius: 20,
-            spreadRadius: 5,
+            color: Colors.black54,
+            blurRadius: 25,
+            spreadRadius: 8,
           ),
         ],
       ),
@@ -112,17 +113,31 @@ class BurnoutGauge extends StatelessWidget {
           Text(
             'Burnout Level',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 15),
+          Text(
+            '${burnoutLevel.toStringAsFixed(1)}%',
+            style: TextStyle(
+              fontSize: 50,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
           SizedBox(height: 10),
           Text(
-            '${burnoutLevel.toStringAsFixed(1)}%',
+            burnoutLevel < 50
+                ? 'Keep Going!'
+                : burnoutLevel < 80
+                    ? 'Take a Break!'
+                    : 'Seek Help!',
             style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontSize: 18,
+              color: Colors.white70,
+              fontStyle: FontStyle.italic,
             ),
           ),
         ],
