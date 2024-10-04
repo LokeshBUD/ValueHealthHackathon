@@ -68,7 +68,6 @@ class _SurveyPageState extends State<SurveyPage> {
         backgroundColor: Colors.deepPurpleAccent,
         onPressed: () {
           if (_validateForm()) {
-<<<<<<< HEAD
             // Detect burnout and set the level
             if (isBurnoutDetected(selectedValues)) {
               burnoutLevel = determineBurnoutLevel(selectedValues);
@@ -76,11 +75,10 @@ class _SurveyPageState extends State<SurveyPage> {
               burnoutLevel = 'No Burnout';
             }
             Navigator.pop(context, burnoutLevel);
-=======
+
             // If all fields are valid, submit the form
             print("Survey Results: $selectedValues");
             _submitSurvey();
->>>>>>> b6a8eba (.)
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
