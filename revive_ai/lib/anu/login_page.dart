@@ -116,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                                   _formKey.currentState!.save();
                                   if (_email == "test@example.com" &&
                                       _password == "password123") {
+                                    // Navigate to Dashboard after successful login
                                     Navigator.pushNamed(context, '/dashboard');
                                   } else {
                                     showDialog(
@@ -164,4 +165,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-

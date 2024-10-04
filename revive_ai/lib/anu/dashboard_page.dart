@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'survey_page.dart';  // Ensure this import is here
+import 'survey_page.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -46,14 +46,16 @@ class _DashboardPageState extends State<DashboardPage> {
                   elevation: 5,
                 ),
                 onPressed: () async {
+                  // Navigate to Survey page
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SurveyPage()),
                   );
 
-                  if (result != null && result is double) {
+                  if (result != null && result is List<String>) {
                     setState(() {
-                      burnoutLevel = result;
+                      // Assuming the result is a list of strings representing the survey results
+                      burnoutLevel = _calculateBurnoutLevel(result);
                     });
                   }
                 },
@@ -71,6 +73,12 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
     );
+  }
+
+  // Function to calculate the burnout level from survey results
+  double _calculateBurnoutLevel(List<String> results) {
+    // Implement your logic to calculate the burnout level based on survey results
+    return 0; // Placeholder
   }
 }
 
@@ -105,27 +113,17 @@ class BurnoutGauge extends StatelessWidget {
             'Burnout Level',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
-              fontFamily: 'Montserrat',
             ),
           ),
           SizedBox(height: 10),
           Text(
-            '${burnoutLevel.toInt()}%',
+            '${burnoutLevel.toStringAsFixed(1)}%',
             style: TextStyle(
-              fontSize: 36,
-              color: Colors.white,
+              fontSize: 40,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Montserrat',
+              color: Colors.white,
             ),
-          ),
-          SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: burnoutLevel / 100,
-            backgroundColor: Colors.white30,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
-            minHeight: 12,
           ),
         ],
       ),
