@@ -8,6 +8,7 @@ class SurveyPage extends StatefulWidget {
 class _SurveyPageState extends State<SurveyPage> {
   // Store selected values for each category
   List<String> selectedValues = List<String>.filled(11, ''); // Initially empty
+  bool formValid = true; // Tracks whether all fields are filled
 
   // Define the categories and their options
   List<List<String>> categoriesOrder = [
@@ -66,9 +67,22 @@ class _SurveyPageState extends State<SurveyPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurpleAccent,
         onPressed: () {
-          // Handle form submission logic here
-          print("Survey Results: $selectedValues");
-          Navigator.pop(context, selectedValues);  // Pass the selected values back
+          if (_validateForm()) {
+            // If all fields are valid, submit the form
+            print("Survey Results: $selectedValues");
+            Navigator.pop(context, selectedValues); // Pass the selected values back
+          } else {
+            // Show an error message if not all fields are filled
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Please fill all fields!',
+                  style: TextStyle(fontFamily: 'Montserrat'),
+                ),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
         },
         child: Icon(Icons.check),
       ),
@@ -107,7 +121,7 @@ class _SurveyPageState extends State<SurveyPage> {
               ),
               dropdownColor: Colors.white,
               icon: Icon(Icons.arrow_drop_down, color: Colors.deepPurpleAccent),
-              underline: Container(),  // Remove default underline
+              underline: Container(), // Remove default underline
               items: categoriesOrder[index]
                   .map((value) => DropdownMenuItem<String>(
                         value: value,
@@ -125,9 +139,34 @@ class _SurveyPageState extends State<SurveyPage> {
               isExpanded: true,
               style: TextStyle(color: Colors.black87, fontSize: 16, fontFamily: 'Montserrat'),
             ),
+            if (!formValid && selectedValues[index] == '') // Show error if field is not selected
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'This field is required',
+                  style: TextStyle(color: Colors.redAccent, fontFamily: 'Montserrat'),
+                ),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  // Helper method to validate that all fields are selected
+  bool _validateForm() {
+    bool allFieldsFilled = true;
+    for (var value in selectedValues) {
+      if (value == '') {
+        allFieldsFilled = false;
+        break;
+      }
+    }
+
+    setState(() {
+      formValid = allFieldsFilled; // Update the form validation state
+    });
+
+    return allFieldsFilled;
   }
 }
