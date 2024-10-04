@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,6 +11,52 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   String? _email;
   String? _password;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+  clientId: '179970594300-rodv379s7bvls296ggcpdluqh4sl8cci.apps.googleusercontent.com',  // Add this line
+);
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return; // User cancelled the sign-in process.
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        Navigator.pushNamed(context, '/dashboard'); // Navigate to dashboard
+      }
+    } catch (error) {
+      print("Google Sign-In failed: $error");
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Sign-In Failed'),
+          content: Text('An error occurred while signing in with Google.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Center(
           child: SingleChildScrollView(
             child: FractionallySizedBox(
-              widthFactor: 0.85, // Makes the card responsive, adjust as needed
+              widthFactor: 0.85,
               child: Card(
                 elevation: 10,
                 shape: RoundedRectangleBorder(
@@ -116,7 +164,6 @@ class _LoginPageState extends State<LoginPage> {
                                   _formKey.currentState!.save();
                                   if (_email == "test@example.com" &&
                                       _password == "password123") {
-                                    // Navigate to Dashboard after successful login
                                     Navigator.pushNamed(context, '/dashboard');
                                   } else {
                                     showDialog(
@@ -158,10 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                             SizedBox(height: 10),
                             // Google Sign-In Button
                             ElevatedButton.icon(
-                              onPressed: () {
-                                // TODO: Implement Google Sign-In
-                                print('Google Sign-In button pressed');
-                              },
+                              onPressed: _signInWithGoogle,
                               icon: Icon(Icons.login, color: Colors.white),
                               label: Text(
                                 'Sign in with Google',

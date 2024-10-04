@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import './anu/login_page.dart';        // Ensure this file exists and is correct
-import './anu/dashboard_page.dart';   // Ensure this file exists and is correct
-import './anu/survey_page.dart';      // Ensure this file exists and is correct
+import 'package:firebase_core/firebase_core.dart';  // Import Firebase
+import './anu/login_page.dart';       
+import './anu/dashboard_page.dart';   
+import './anu/survey_page.dart';      
+import 'firebase_options.dart';       // Import Firebase options
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(          // Initialize Firebase
+    options: DefaultFirebaseOptions.currentPlatform, // Using platform-specific options
+  );
   runApp(MyApp());
 }
 
@@ -14,16 +20,16 @@ class MyApp extends StatelessWidget {
       title: 'Burnout Tracker',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
-        fontFamily: 'Roboto',  // Make sure the font is declared in pubspec.yaml
+        fontFamily: 'Roboto',
         textTheme: TextTheme(
            bodyLarge: TextStyle(fontSize: 16.0, fontFamily: 'Hind'),
         ),
       ),
-      initialRoute: '/login',  // Starting page is set to LoginPage
+      initialRoute: '/login',
       routes: {
-        '/login': (context) => LoginPage(),         // Route for LoginPage
-        '/dashboard': (context) => DashboardPage(), // Route for DashboardPage
-        '/survey': (context) => SurveyPage(),       // Route for SurveyPage
+        '/login': (context) => LoginPage(),
+        '/dashboard': (context) => DashboardPage(),
+        '/survey': (context) => SurveyPage(),
       },
     );
   }

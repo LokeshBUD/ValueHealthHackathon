@@ -1,4 +1,6 @@
+import 'dart:convert'; // For converting data to JSON
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // For sending HTTP requests
 
 class SurveyPage extends StatefulWidget {
   @override
@@ -66,6 +68,7 @@ class _SurveyPageState extends State<SurveyPage> {
         backgroundColor: Colors.deepPurpleAccent,
         onPressed: () {
           if (_validateForm()) {
+<<<<<<< HEAD
             // Detect burnout and set the level
             if (isBurnoutDetected(selectedValues)) {
               burnoutLevel = determineBurnoutLevel(selectedValues);
@@ -73,6 +76,11 @@ class _SurveyPageState extends State<SurveyPage> {
               burnoutLevel = 'No Burnout';
             }
             Navigator.pop(context, burnoutLevel);
+=======
+            // If all fields are valid, submit the form
+            print("Survey Results: $selectedValues");
+            _submitSurvey();
+>>>>>>> b6a8eba (.)
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -165,5 +173,69 @@ class _SurveyPageState extends State<SurveyPage> {
 
   bool _validateForm() {
     return selectedValues.every((value) => value.isNotEmpty);
+  }
+
+  // Function to send data to Flask server
+  Future<void> _submitSurvey() async {
+    // The URL of the Flask backend
+    const String url = 'http://localhost:5000/predict';  // Replace '192.168.x.x' with the actual IP of your Flask server
+
+    // Create a map with the survey data
+    Map<String, String> surveyData = {};
+    for (int i = 0; i < categoryLabels.length; i++) {
+      surveyData[categoryLabels[i]] = selectedValues[i];
+    }
+
+    try {
+      // Send a POST request to the Flask server with the survey data
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(surveyData),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the response from the server
+        final responseData = json.decode(response.body);
+        String burnoutRisk = responseData['burnout_risk'].toString();
+
+        // Show the result in a dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Burnout Prediction'),
+              content: Text('Your predicted burnout risk is: $burnoutRisk'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // Handle error from the server
+        print('Error: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get a prediction. Please try again later.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle connection errors
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Connection error. Please try again.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 }
