@@ -175,65 +175,61 @@ class _SurveyPageState extends State<SurveyPage> {
 
   // Function to send data to Flask server
   Future<void> _submitSurvey() async {
-    // The URL of the Flask backend
-    const String url = 'http://localhost:5000/predict';  // Replace '192.168.x.x' with the actual IP of your Flask server
+  const String url = 'http://192.0.0.2:5001/predict'; // Update with your Flask server IP
 
-    // Create a map with the survey data
-    Map<String, String> surveyData = {};
-    for (int i = 0; i < categoryLabels.length; i++) {
-      surveyData[categoryLabels[i]] = selectedValues[i];
-    }
+  Map<String, String> surveyData = {};
+  for (int i = 0; i < categoryLabels.length; i++) {
+    surveyData[categoryLabels[i]] = selectedValues[i];
+  }
 
-    try {
-      // Send a POST request to the Flask server with the survey data
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(surveyData),
+  print("Sending Survey Data: $surveyData"); // Log survey data
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(surveyData),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      String burnoutRisk = responseData['burnout_risk'].toString();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Burnout Prediction'),
+            content: Text('Your predicted burnout risk is: $burnoutRisk'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
       );
-
-      if (response.statusCode == 200) {
-        // Decode the response from the server
-        final responseData = json.decode(response.body);
-        String burnoutRisk = responseData['burnout_risk'].toString();
-
-        // Show the result in a dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Burnout Prediction'),
-              content: Text('Your predicted burnout risk is: $burnoutRisk'),
-              actions: [
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // Handle error from the server
-        print('Error: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to get a prediction. Please try again later.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
-    } catch (e) {
-      // Handle connection errors
-      print('Error: $e');
+    } else {
+      print('Error: ${response.statusCode} - ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Connection error. Please try again.'),
+          content: Text('Failed to get a prediction. Status: ${response.statusCode}'),
           backgroundColor: Colors.redAccent,
         ),
       );
     }
+  } catch (e) {
+    print('Error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Connection error. Please try again.'),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
+}
+
 }
